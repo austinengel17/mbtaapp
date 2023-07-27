@@ -22,7 +22,7 @@ import java.util.Map;
 public class MbtaApiService {
     private static final String API_URL = "https://api-v3.mbta.com";
     private static final String FILTER_BY = "&filter[%s]=%s";
-    private static final String API_KEY = PropertiesReader.getProperty("MBTA_API_KEY");; //change to be in property file
+    private static final String API_KEY = PropertiesReader.getProperty("MBTA_API_KEY"); //change to be in property file
 
     public MbtaApiService() {
     }
@@ -120,6 +120,7 @@ public class MbtaApiService {
         String id = vehicleDataNode.get("id").asText();
         String currentStatus = vehicleDataNode.get("attributes").get("current_status").asText();
         String stopId = vehicleDataNode.get("relationships").get("stop").get("data").get("id").asText();
-        return new VehicleData(id, currentStatus, stopId);
+        String directionId = vehicleDataNode.get("attributes").get("direction_id").asText();
+        return new VehicleData(id, currentStatus, stopId, directionId);
     }
 }

@@ -4,10 +4,13 @@ public class VehicleData {
     String id;
     String currentStatus;
     String stopId;
-    public VehicleData(String id, String currentStatus, String stopId){
+
+    String directionId;
+    public VehicleData(String id, String currentStatus, String stopId, String directionId){
         this.id = id;
         this.currentStatus = currentStatus;
         this.stopId = stopId;
+        this.directionId = directionId;
     }
 
     public String getId() {
@@ -32,5 +35,13 @@ public class VehicleData {
 
     public void setStopId(String stopId) {
         this.stopId = stopId;
+    }
+
+    public String getDirectionId() {
+        return directionId;
+    }
+
+    public void setDirectionId(String directionId) {
+        this.directionId = directionId;
     }
 }

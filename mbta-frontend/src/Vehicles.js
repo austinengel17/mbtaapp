@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import * as d3 from "d3";
-
+import './Vehicles.css';
 
 
 function Vehicles({ svgRef, stationData, stationMapping, selectedLine}) { 
@@ -14,8 +14,9 @@ function Vehicles({ svgRef, stationData, stationMapping, selectedLine}) {
 
 
     useEffect(() => {
-      const svg = svgRef.current;
-      var svgElement = d3.select(svg);
+      const svg = svgRef.current;         
+      var svgElement = d3.select(svg);    //left facing arrow marker
+
       svgElement.selectAll("g.vehicle-group")
       .data(vehicleList, d=>d.id)
       .join(
@@ -25,63 +26,96 @@ function Vehicles({ svgRef, stationData, stationMapping, selectedLine}) {
           .attr("transform", function(d, i){
             var stopId = d.stopId;
               var stopName = stationMapping[stopId];
+              console.log('pre bounding rec client ', stopName);
+              console.log('pre bounding rec client ', stopId);
               var station = svgElement.selectAll("#" + stopName)
               var circlePosition = station.node().getBoundingClientRect()
               var x = +circlePosition.left + window.pageXOffset;
+              var directionId = d.directionId;
               if(d.currentStatus == inTransitTo){
-                x = x-30;
+                if(directionId == 0)
+                  x=x+30;
+                else
+                  x=x-30;
               }
               if(d.currentStatus == incomingAt){
-                x = x-15;
+                if(directionId == 0)
+                  x=x+15;
+                else
+                  x=x-15;
               }
 
             return "translate(" + x + " , 155)";
           });
 
-           vGroup.append("rect")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr("width", 5)
-            .attr("height", 5);
+           // vGroup.append("rect")
+           //  .attr("x", 0)
+           //  .attr("y", 0)
+           //  .attr("width", 5)
+           //  .attr("height", 5);
+
+           vGroup.append("polygon") 
+            .attr("points", function(d){
+              if(d.directionId == 1)
+                return "3,0 -3,0 -3,7 3,7 7,3"; //outbound
+              else
+                return "-3,5 3,5 3,12 -3,12 -7,8"; //inbound
+            })
+            .attr("fill", "lightgrey");
 
           vGroup
           .append("text")
           .attr("class", "vehicle")
-          .attr("x", 0)
-          .attr("y", 5)
+          .attr("x", 15)
+          .attr("y",0)
           .attr("font-size", 5)
           .attr("transform", "rotate(45)")
-          .text(function(d){return d.id + " - " + d.currentStatus});
+          .text(function(d){
+             var stopId = d.stopId;
+            var stopName = stationMapping[stopId];
+            return d.id + " - " + d.currentStatus + ' - ' + stationMapping[stopId] + ' - direction: ' + d.directionId;
+          });
       },
       (update) => {
-        update.attr("transform", function(d, i){
+        update
+        .transition()
+        .duration(3000)
+        .attr("transform", function(d, i){
             var stopId = d.stopId;
               var stopName = stationMapping[stopId];
               var station = svgElement.selectAll("#" + stopName)
+              console.log('pre bounding rec client ', stopName);
+              console.log('pre bounding rec client ', stopId);
               var circlePosition = station.node().getBoundingClientRect()
               var x = +circlePosition.left + window.pageXOffset;
+              var directionId = d.directionId;
               if(d.currentStatus == inTransitTo){
-                x = x-30;
+                if(directionId == 0)
+                  x=x+30;
+                else
+                  x=x-30;
               }
               if(d.currentStatus == incomingAt){
-                x = x-15;
+                if(directionId == 0)
+                  x=x+15;
+                else
+                  x=x-15;
               }
 
             return "translate(" + x + " , 155)";
           });
+        update.select("polygon")
+          .attr("points", function(d){
+              if(d.directionId == 1)
+                return "3,0 -3,0 -3,7 3,7 7,3"; //outbound
+              else
+                return "-3,5 3,5 3,12 -3,12 -7,8"; //inbound
+            })
         update.select("text").text(function(d){
           var stopId = d.stopId;
           var stopName = stationMapping[stopId];
-          return d.id + " - " + d.currentStatus + ' - ' + stationMapping[stopId];
+          return d.id + " - " + d.currentStatus + ' - ' + stationMapping[stopId] + ' - direction: ' + d.directionId;// == 0 ? "inbound" : "outbound";
         });
-        // update.select("rect")
-        // .attr("x", function(d,i){
-        //       var stopId = d.stopId;
-        //       var stopName = stationMapping[stopId];
-        //       var station = svgElement.selectAll("#" + stopName)
-        //       var circlePosition = station.node().getBoundingClientRect();
-        //       return +circlePosition.left + window.pageXOffset;
-        //     })
       },
       (exit) => {
         exit.remove(); 

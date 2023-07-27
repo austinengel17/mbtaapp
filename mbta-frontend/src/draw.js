@@ -25,7 +25,7 @@ import * as d3 from "d3";
     .attr("class", "station");
 
     stopGroup.append("text")
-    .text(function(d) {//
+    .text(function(d) {
       return d[Object.keys(d)[0]].name;
     })
     .attr("width", 100)

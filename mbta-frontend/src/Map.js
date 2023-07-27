@@ -11,20 +11,25 @@ function Map() {
   const [stationData, setStationData] = useState(null);
   const [stationMapping, setStationMapping] = useState(null);
   const [selectedLine, setSelectedLine] = useState("Green-E");
+  const [dataReady, setDataReady] = useState(false);
+
   var backendHost = "localhost:8080/";
   var controllerEndpoint = "mbta/v1/livemap";
   var vehiclePositionSub = "/vehicle/location/" + selectedLine;
   var mbtaStopsEndpoint = "/stops/line/" + selectedLine;
   var stationMappingEndpoint = "/stops/child-parent-relation";
   const options = [
-    { value: 'Green-E', label: 'Green-E' },
-    { value: 'Green-D', label: 'Green-D' },
-    { value: 'Orange', label: 'Orange' }
+    //{ value: 'Green-A', label: 'Green-A' },
+    //{ value: 'Green-B', label: 'Green-B' }, closed line 
+    { value: 'Green-C', label: 'Green-C' }, 
+    { value: 'Green-D', label: 'Green-D' }, 
+    { value: 'Green-E', label: 'Green-E' }
   ];
 
 useEffect(()=>{
+setDataReady(false);
 ////////////////////////////////////////////////////////////
-  var xhr = new XMLHttpRequest();
+  var xhr = new XMLHttpRequest();//
     // Making our connection 
   var url = "http://" + backendHost + controllerEndpoint + mbtaStopsEndpoint;
   xhr.open("GET", url, true);
@@ -67,21 +72,29 @@ useEffect(()=>{
 /////////////////////////
 },[selectedLine]);
 
+useEffect(()=>{
+  if(stationData != null && stationMapping != null){
+    setDataReady(true);
+  }
+}, [stationData, stationMapping]);
   const handleChange = (selectedOption) => {
     setSelectedLine(selectedOption.value);
     console.log(`Option selected:`, selectedOption.value);
   };
 
 
-  if(stationData == null || stationMapping == null){
-    return(<div>Loading...</div>);
-  }
   return (
     <div className="Map">
+    {dataReady && options != null ? (
+      <>
+      <h2>{selectedLine}</h2>
       <svg height="500" width="2000" ref={svgRef} >
         <Draw stationData={stationData} svgRef={svgRef} selectedLine={selectedLine}/>
         <Vehicles svgRef={svgRef} stationData={stationData} stationMapping={stationMapping} selectedLine={selectedLine}/>
       </svg>
+      </>
+    ) : (<div>Loading...</div>)
+    }
       <Select options={options} onChange={handleChange}/>
     </div> 
   );
