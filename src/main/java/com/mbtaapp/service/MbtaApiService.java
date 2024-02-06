@@ -43,6 +43,11 @@ public class MbtaApiService {
                         stops.put(node.get("id"), stop);
                     }
                     return stops;
+                })
+                .onErrorResume(throwable -> {
+                    // Handle WebClient-related exceptions
+                    throwable.printStackTrace();
+                    return Mono.error(throwable);
                 });
     }
     public Mono<Map<String, String>> getChildParentStopRelation(){
@@ -59,6 +64,11 @@ public class MbtaApiService {
                         childParentStopRelation.put(id, parentId);
                     }
                     return childParentStopRelation;
+                })
+                .onErrorResume(throwable -> {
+                    // Handle WebClient-related exceptions
+                    throwable.printStackTrace();
+                    return Mono.error(throwable);
                 });
     }
     public Flux<VehicleSseObject> subscribeVehiclesSse(Map<String, String> params){
@@ -74,6 +84,7 @@ public class MbtaApiService {
                 .retrieve()
                 .bodyToFlux(ServerSentEvent.class)
                 .map(event -> {
+                    System.out.println(API_URL + reqUrl);
                     VehicleSseObject vehicleSseObject = new VehicleSseObject();
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode json;
@@ -90,14 +101,20 @@ public class MbtaApiService {
                             VehicleData vehicleData = vehicleDataAsObject(node);
                             vehicles.add(vehicleData);
                         }
-                    if(event.event().equals("update") || event.event().equals("")){
+                    if(event.event().equals("update") || event.event().equals("add")){
+                        if(event.event().equals("add")) System.out.println("added vehicle: " + vehicleDataAsObject(json).getId());
                         vehicles.add(vehicleDataAsObject(json));
                     }
                     if(event.event().equals("remove")){
+                        System.out.println("REMOVAL OF : " + json);
                         vehicles.add(vehicleDataAsObject(json));
                     }
-                    System.out.println(vehicleSseObject);
                     return vehicleSseObject;
+                })
+                .onErrorResume(throwable -> {
+                    // Handle WebClient-related exceptions
+                    throwable.printStackTrace();
+                    return Flux.error(throwable);
                 });
     }
 
@@ -116,11 +133,25 @@ public class MbtaApiService {
         return path;
     }
 
-    private VehicleData vehicleDataAsObject(JsonNode vehicleDataNode){
-        String id = vehicleDataNode.get("id").asText();
-        String currentStatus = vehicleDataNode.get("attributes").get("current_status").asText();
-        String stopId = vehicleDataNode.get("relationships").get("stop").get("data").get("id").asText();
-        String directionId = vehicleDataNode.get("attributes").get("direction_id").asText();
-        return new VehicleData(id, currentStatus, stopId, directionId);
+    private VehicleData vehicleDataAsObject(JsonNode vehicleDataNode){ //make into mapper class
+        String id = "";
+        String currentStatus = "";
+        String stopId = "";
+        String directionId = "";
+        try {
+            System.out.println(vehicleDataNode);
+            id = vehicleDataNode.get("id").asText();
+            if(vehicleDataNode.get("attributes") != null) {
+                currentStatus = vehicleDataNode.get("attributes").get("current_status").asText();
+                directionId = vehicleDataNode.get("attributes").get("direction_id").asText();
+                stopId = vehicleDataNode.get("relationships").get("stop").get("data").get("id").asText();
+            }
+        } catch (Exception e){
+            System.out.println("ERROR mapping vehicle data as object " + vehicleDataNode);
+            throw e;
+        }
+        finally{
+            return new VehicleData(id, currentStatus, stopId, directionId);
+        }
     }
 }

@@ -26,7 +26,14 @@ public class MbtaLiveMapController {
     @ResponseBody
     public Mono<Map<JsonNode, Map>> getStopsByLine(@PathVariable("line") String line) {
         System.out.println("request");
-        return service.getStopsByLine(line);
+        try {
+            return service.getStopsByLine(line);
+
+        } catch (Exception e) {
+                // Handle service-related exceptions
+                e.printStackTrace();
+                return Mono.error(e);
+        }
     }
 
     //Returns map of <child_stop.id, parent_station.id>
@@ -34,17 +41,29 @@ public class MbtaLiveMapController {
     @CrossOrigin(origins = "*")
     @ResponseBody
     public Mono<Map<String, String>> getChildParentStopRelation() {
-        return service.getChildParentStopRelation();
+        try {
+            return service.getChildParentStopRelation();
+        } catch (Exception e) {
+            // Handle service-related exceptions
+            e.printStackTrace();
+            return Mono.error(e);
+        }
     }
 
     @GetMapping(path="/vehicle/location/{line}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @CrossOrigin(origins = "http://localhost:3000")
     @ResponseBody
     public Flux<VehicleSseObject> vehicleLocationSubscription(@PathVariable("line") String line) {
-        return service.subscribeVehiclesSse(Map.of(
-				"route_type","0,1",
-				"route", ""+line
-		));
+        try {
+            return service.subscribeVehiclesSse(Map.of(
+                    "route_type", "0,1",
+                    "route", "" + line
+            ));
+        } catch (Exception e) {
+                // Handle service-related exceptions
+                e.printStackTrace();
+                return Flux.error(e);
+        }
     }
 
     @GetMapping(path="/hi")
