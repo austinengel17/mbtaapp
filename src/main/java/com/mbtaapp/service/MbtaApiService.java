@@ -77,6 +77,7 @@ public class MbtaApiService {
         String reqUrl = reqUrlBuilder(urlPath, params);
         System.out.println(reqUrl);
         WebClient client = WebClient.create();
+        System.out.println("New Connection to 3rd party API");
         return client.get()
                 .uri(API_URL + reqUrl)
                 .accept(MediaType.TEXT_EVENT_STREAM)
