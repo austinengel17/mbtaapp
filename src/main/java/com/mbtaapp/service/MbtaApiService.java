@@ -22,7 +22,7 @@ import java.util.Map;
 public class MbtaApiService {
     private static final String API_URL = "https://api-v3.mbta.com";
     private static final String FILTER_BY = "&filter[%s]=%s";
-    private static final String API_KEY = PropertiesReader.getProperty("MBTA_API_KEY"); //change to be in property file
+    private static final String API_KEY = System.getenv("MBTA_API_KEY");
 
     public MbtaApiService() {
     }
