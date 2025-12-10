@@ -31,7 +31,7 @@ public class MbtaApiService {
         WebClient client = WebClient.create();
         return client.get()
                 .uri(API_URL + "/stops?filter[route]=" + line)
-                .header("x-api-key","d546460f66f44da7b3b05278c30d3769")
+                .header("x-api-key",API_KEY)
                 .retrieve()
                 .bodyToMono(JsonNode.class).map(jsonNode -> jsonNode.get("data")).map(jsonArr -> {
                     Map<JsonNode, Map> stops = new LinkedHashMap<>();
